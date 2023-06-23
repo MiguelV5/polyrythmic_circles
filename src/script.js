@@ -1,24 +1,5 @@
-/*
-  --- README ---
-  
-  This polyrhythmic (definition below) spiral effect was inspired by the awesome work of @project_jdm on YouTube.
-  
-  It was created from scratch with plain old js on the canvas. I basically just reverse engineered the one in his video here (https://youtu.be/4GaGnU8Ij2Y) to the best of my ability and then kinda morphed it into my own thing. It took a long freakin time.
-  
-  I didn't know what polyrhythms were before seeing his content so I had to ask ChatGPT. I then had to ask ChatGPT again, but this time to explain like I'm 5 years old. Here is what it said:
-
-  You know when you're on a swing? Imagine there are two swings side by side. Your friend is swinging three times for every two times you swing. So, sometimes you're at the top together, but other times, you're not. When you're both at the top at the same time, that's like a polyrhythm in music. Two different beats, syncing up at special moments.
-  
-  Anyways, in the settings object below I have outlined a few different parameters to make it easier to modify some of the core features i.e. start time, total duration, number of cycles, etc.
-  
-  I didn't know a good way to get instrument sound effects, in particular multiple octaves worth, so I made my own on SoundTrap using the vibraphone. A couple other options are also listed below.
-  
-  If you want to get your hands dirty you can also take a whack at modifying the code. Just be careful messing with how the notes are played. I almost went deaf a few times lol. And feel free to use this for literally anything.
-  
-*/
-
 const paper = document.getElementById("paper"),
-    pen = paper.getContext("2d");
+    plotter = paper.getContext("2d");
 
 const get = selector => document.querySelector(selector);
 
@@ -28,35 +9,35 @@ const toggles = {
 
 // Use whatever colors you want
 // https://unsplash.com/photos/tZCrFpSNiIQ
-// const colors = [
-//   "#D0E7F5",
-//   "#D9E7F4",
-//   "#D6E3F4",
-//   "#BCDFF5",
-//   "#B7D9F4",
-//   "#C3D4F0",
-//   "#9DC1F3",
-//   "#9AA9F4",
-//   "#8D83EF",
-//   "#AE69F0",
-//   "#D46FF1",
-//   "#DB5AE7",
-//   "#D911DA",
-//   "#D601CB",
-//   "#E713BF",
-//   "#F24CAE",
-//   "#FB79AB",
-//   "#FFB6C1",
-//   "#FED2CF",
-//   "#FDDFD5",
-//   "#FEDCD1"
-// ];
-// Here I'm using the same color for all 21 arcs
-const colors = Array(21).fill("#A6C48A");
+const colors = [
+    "#D0E7F5",
+    "#D9E7F4",
+    "#D6E3F4",
+    "#BCDFF5",
+    "#B7D9F4",
+    "#C3D4F0",
+    "#9DC1F3",
+    "#9AA9F4",
+    "#8D83EF",
+    "#AE69F0",
+    "#D46FF1",
+    "#DB5AE7",
+    "#D911DA",
+    "#D601CB",
+    "#E713BF",
+    "#F24CAE",
+    "#FB79AB",
+    "#FFB6C1",
+    "#FED2CF",
+    "#FDDFD5",
+    "#FEDCD1"
+];
+// Using the same color for all 21 arcs
+// const colors = Array(21).fill("#A6C48A");
 
 const settings = {
     startTime: new Date().getTime(), // This can be in the future
-    duration: 900, // Total time for all dots to realign at the starting point
+    duration: 900, // Total time in seconds for all dots to realign at the starting point. 900 = 15 minutes
     maxCycles: Math.max(colors.length, 100), // Must be above colors.length or else...
     soundEnabled: false, // User still must interact with screen first
     pulseEnabled: true, // Pulse will only show if sound is enabled as well
@@ -123,7 +104,7 @@ const calculatePositionOnArc = (center, radius, angle) => ({
 const playKey = index => keys[index].play();
 
 const init = () => {
-    pen.lineCap = "round";
+    plotter.lineCap = "round";
 
     arcs = colors.map((color, index) => {
         const velocity = calculateVelocity(index),
@@ -140,12 +121,12 @@ const init = () => {
 }
 
 const drawArc = (x, y, radius, start, end, action = "stroke") => {
-    pen.beginPath();
+    plotter.beginPath();
 
-    pen.arc(x, y, radius, start, end);
+    plotter.arc(x, y, radius, start, end);
 
-    if (action === "stroke") pen.stroke();
-    else pen.fill();
+    if (action === "stroke") plotter.stroke();
+    else plotter.fill();
 }
 
 const drawPointOnArc = (center, arcRadius, pointRadius, angle) => {
@@ -195,9 +176,9 @@ const draw = () => { // Definitely not optimized
         const radius = base.initialRadius + (base.spacing * index);
 
         // Draw arcs
-        pen.globalAlpha = determineOpacity(currentTime, arc.lastImpactTime, 0.15, 0.65, 1000);
-        pen.lineWidth = base.length * 0.002;
-        pen.strokeStyle = arc.color;
+        plotter.globalAlpha = determineOpacity(currentTime, arc.lastImpactTime, 0.15, 0.65, 1000);
+        plotter.lineWidth = base.length * 0.002;
+        plotter.strokeStyle = arc.color;
 
         const offset = base.circleRadius * (5 / 3) / radius;
 
@@ -206,16 +187,16 @@ const draw = () => { // Definitely not optimized
         drawArc(center.x, center.y, radius, offset, Math.PI - offset);
 
         // Draw impact points
-        pen.globalAlpha = determineOpacity(currentTime, arc.lastImpactTime, 0.15, 0.85, 1000);
-        pen.fillStyle = arc.color;
+        plotter.globalAlpha = determineOpacity(currentTime, arc.lastImpactTime, 0.15, 0.85, 1000);
+        plotter.fillStyle = arc.color;
 
         drawPointOnArc(center, radius, base.circleRadius * 0.75, Math.PI);
 
         drawPointOnArc(center, radius, base.circleRadius * 0.75, 2 * Math.PI);
 
         // Draw moving circles
-        pen.globalAlpha = 1;
-        pen.fillStyle = arc.color;
+        plotter.globalAlpha = 1;
+        plotter.fillStyle = arc.color;
 
         if (currentTime >= arc.nextImpactTime) {
             if (settings.soundEnabled) {
