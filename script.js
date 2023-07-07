@@ -1,7 +1,17 @@
 // ============================== SETUP ==============================
 
+window.addEventListener("load", () => {
+    const loader = document.querySelector(".loader");
+    loader.classList.add("loader-hidden");
+    loader.addEventListener("transitionend", () => loader.remove());
+});
+
+
 let canvas = document.getElementById("canvas")
 let plotter = canvas.getContext("2d");
+
+// flags
+let isAnimationEnabled = false;
 
 function getSelector(selector) {
     return document.querySelector(selector);
@@ -35,14 +45,24 @@ const COLORS = [
     "#BEE6F5",
 ];
 
+const INSTRUMENTS = {
+    default: "default",
+    wave: "wave",
+    vibraphone: "vibraphone"
+}
+
 let settings = {
     startTime: new Date().getTime(),
     duration: 900, // Total time in seconds for all dots to realign at the starting point. 900 = 15 minutes
     maxCycles: Math.max(COLORS.length, 100),
     soundEnabled: false, // User still must interact with screen first
     pulseEnabled: true, // Pulse will only show if sound is enabled as well
-    instrument: "vibraphone" // "default" | "wave" | "vibraphone"
+    instrument: INSTRUMENTS.wave,
+    defaultBaseOpacity: 0.25,
+    defaultMaxOpacity: 0.9,
+    defaultPulseDuration: 1000
 }
+
 
 
 
@@ -55,7 +75,20 @@ function handleSoundToggle(enabled = !settings.soundEnabled) {
 
 document.onvisibilitychange = () => handleSoundToggle(false);
 
-canvas.onclick = () => handleSoundToggle();
+function handleFirstInteraction() {
+    isAnimationEnabled = true;
+    handleSoundToggle();
+
+    canvas.removeEventListener("click", handleFirstInteraction);
+    canvas.onclick = () => handleSoundToggle(); // override onclick for future usage
+
+    settings.startTime = new Date().getTime(); // reset start time for proper animation
+
+    initCircles(); // reset circles for proper impact times
+    render(); // start animation
+}
+
+canvas.addEventListener("click", handleFirstInteraction);
 
 // ============================== AUDIOKEYS RETRIEVAL ==============================
 
@@ -115,7 +148,7 @@ function calculatePositionOnArc(center, radius, angle) {
 
 function playKey(index) { audioKeys[index].play(); }
 
-function init() {
+function initCircles() {
     plotter.lineCap = "round";
 
     circles = COLORS.map(
@@ -136,7 +169,8 @@ function init() {
 
 
 // ============================== RENDER SETUP ==============================
-function renderSetup() {
+
+function setupForRenderer() {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
 
@@ -167,7 +201,7 @@ function renderSetup() {
 
     base.initialRadius = base.length * 0.05;
     base.circleRadius = base.length * 0.006;
-    base.clearance = base.length * 0.03;
+    base.clearance = base.length * 0.02;
     base.spacing = (base.length - base.initialRadius - base.clearance) / 2 / COLORS.length;
 
     return {
@@ -178,7 +212,7 @@ function renderSetup() {
 
 // ============================== SMALL RENDERING ==============================
 
-function drawArc(x, y, radius, start, end, action = "stroke") {
+function renderArc(x, y, radius, start, end, action = "stroke") {
     plotter.beginPath();
 
     plotter.arc(x, y, radius, start, end);
@@ -187,34 +221,46 @@ function drawArc(x, y, radius, start, end, action = "stroke") {
     else plotter.fill();
 }
 
-function drawDotOnArc(center, arcRadius, dotRadius, angle) {
+function renderDotOnArc(center, arcRadius, dotRadius, angle) {
     const position = calculatePositionOnArc(center, arcRadius, angle);
 
-    drawArc(position.x, position.y, dotRadius, 0, 2 * Math.PI, "fill");
+    renderArc(position.x, position.y, dotRadius, 0, 2 * Math.PI, "fill");
 }
 
 // ============================== COMPOSED RENDERING ==============================
 
-function renderBgCircle(center, radius, color, currentTime, lastImpactTime, baseRadius, baseLength) {
-    plotter.globalAlpha = determineOpacity(currentTime, lastImpactTime, 0.15, 0.65, 1000);
+function renderBgCircle(center, radiusFromCenter, color, currentTime, lastImpactTime, baseRadius, baseLength) {
+    plotter.globalAlpha = determineOpacity(
+        currentTime,
+        lastImpactTime,
+        settings.defaultBaseOpacity,
+        settings.defaultMaxOpacity,
+        settings.defaultPulseDuration
+    );
     plotter.lineWidth = baseLength * 0.002;
     plotter.strokeStyle = color;
 
-    const offset = baseRadius * (5 / 3) / radius;
+    const offset = baseRadius * (5 / 3) / radiusFromCenter;
 
-    drawArc(center.x, center.y, radius, Math.PI + offset, (2 * Math.PI) - offset);
-    drawArc(center.x, center.y, radius, offset, Math.PI - offset);
+    renderArc(center.x, center.y, radiusFromCenter, Math.PI + offset, (2 * Math.PI) - offset); // AESTHETIC POSSIBLE CHANGE
+    renderArc(center.x, center.y, radiusFromCenter, offset, Math.PI - offset);
 }
 
-function renderBgImpactPoints(center, radius, color, currentTime, lastImpactTime, baseRadius) {
-    plotter.globalAlpha = determineOpacity(currentTime, lastImpactTime, 0.15, 0.85, 1000);
+function renderBgImpactPoints(center, radiusFromCenter, color, currentTime, lastImpactTime, baseRadius) {
+    plotter.globalAlpha = determineOpacity(
+        currentTime,
+        lastImpactTime,
+        settings.defaultBaseOpacity,
+        settings.defaultMaxOpacity,
+        settings.defaultPulseDuration
+    );
     plotter.fillStyle = color;
 
-    drawDotOnArc(center, radius, baseRadius * 0.75, Math.PI);
-    drawDotOnArc(center, radius, baseRadius * 0.75, 2 * Math.PI);
+    renderDotOnArc(center, radiusFromCenter, baseRadius * 0.75, Math.PI);
+    renderDotOnArc(center, radiusFromCenter, baseRadius * 0.75, 2 * Math.PI); // AESTHETIC POSSIBLE CHANGE
 }
 
-function renderMovingDot(center, radius, index, currentTime, circle, elapsedTime, baseRadius, baseMaxAngle) {
+function renderMovingDot(center, radiusFromCenter, index, currentTime, circle, elapsedTime, baseRadius, baseMaxAngle) {
     plotter.globalAlpha = 1;
     plotter.fillStyle = circle.color;
 
@@ -230,30 +276,48 @@ function renderMovingDot(center, radius, index, currentTime, circle, elapsedTime
     const distance = elapsedTime >= 0 ? (elapsedTime * circle.velocity) : 0;
     const angle = (Math.PI + distance) % baseMaxAngle;
 
-    drawDotOnArc(center, radius, baseRadius, angle);
+    renderDotOnArc(center, radiusFromCenter, baseRadius, angle);
+}
+
+function preAnimationRenders() {
+    const currentTime = new Date().getTime();
+    const { center, base } = setupForRenderer();
+
+    circles.forEach((circle, index) => {
+        const radiusFromCenter = base.initialRadius + (base.spacing * index);
+
+        renderBgCircle(center, radiusFromCenter, circle.color, currentTime, circle.lastImpactTime, base.circleRadius, base.length);
+
+        renderBgImpactPoints(center, radiusFromCenter, circle.color, currentTime, circle.lastImpactTime, base.circleRadius);
+    });
+
 }
 
 function render() {
 
-    const currentTime = new Date().getTime();
-    const elapsedTime = (currentTime - settings.startTime) / 1000;
+    if (isAnimationEnabled) {
 
-    const { center, base } = renderSetup();
+        const currentTime = new Date().getTime();
+        const elapsedTime = (currentTime - settings.startTime) / 1000;
+
+        const { center, base } = setupForRenderer();
 
 
-    circles.forEach((circle, index) => {
-        const radius = base.initialRadius + (base.spacing * index);
+        circles.forEach((circle, index) => {
+            const radiusFromCenter = base.initialRadius + (base.spacing * index);
 
-        renderBgCircle(center, radius, circle.color, currentTime, circle.lastImpactTime, base.circleRadius, base.length);
+            renderBgCircle(center, radiusFromCenter, circle.color, currentTime, circle.lastImpactTime, base.circleRadius, base.length);
 
-        renderBgImpactPoints(center, radius, circle.color, currentTime, circle.lastImpactTime, base.circleRadius);
+            renderBgImpactPoints(center, radiusFromCenter, circle.color, currentTime, circle.lastImpactTime, base.circleRadius);
 
-        renderMovingDot(center, radius, index, currentTime, circle, elapsedTime, base.circleRadius, base.maxAngle);
-    });
+            renderMovingDot(center, radiusFromCenter, index, currentTime, circle, elapsedTime, base.circleRadius, base.maxAngle);
 
+        });
+    }
     requestAnimationFrame(render);
 }
 
-init();
+// for first static render only (while waiting for user interaction)
+initCircles();
+preAnimationRenders();
 
-render();

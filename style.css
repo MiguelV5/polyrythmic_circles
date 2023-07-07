@@ -1,9 +1,10 @@
+/* ========================  */
 html,
 body {
     height: 100vh;
     background-color: black;
     overflow: hidden;
-    font-family: "Noto Sans", sans-serif;
+    font-family: "Fira Sans", "Noto Sans", sans-serif;
 }
 
 * {
@@ -12,28 +13,64 @@ body {
     padding: 0;
 }
 
-canvas {
+/* ========================  */
+
+.loader {
+    position: fixed;
+    top: 0px;
+    left: 0px;
     height: 100vh;
     width: 100vw;
-    position: relative;
-    z-index: 9;
-}
-
-#logo {
+    background-color: black;
+    z-index: 20;
     display: flex;
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 4;
-    opacity: 0.1;
-    white-space: nowrap;
-    pointer-events: none;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1000ms, visibility 1000ms;
 }
 
-#logo>img {
-    height: 3.2vmin;
+.loader-hidden {
+    opacity: 0;
+    visibility: hidden;
 }
+
+.loader .ring {
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+    animation: ring 2s linear infinite;
+}
+
+@keyframes ring {
+    0% {
+        transform: rotate(0deg);
+        box-shadow: 1px 5px 3px #BCDFF5;
+    }
+
+    50% {
+        transform: rotate(180deg);
+        box-shadow: 1px 5px 3px #889AD5;
+    }
+
+    100% {
+        transform: rotate(360deg);
+        box-shadow: 1px 5px 3px #87BDF2;
+    }
+}
+
+.ring:before {
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+/* ========================  */
 
 #background-image,
 #background-filter {
@@ -58,6 +95,33 @@ canvas {
     background: radial-gradient(rgb(0 0 0 / 60%) 60%, transparent);
 }
 
+/* ========================  */
+
+canvas {
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    z-index: 9;
+}
+
+
+#logo {
+    display: flex;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    opacity: 0.15;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+#logo>img {
+    height: 3.2vmin;
+}
+
+
 #control-bar-wrapper {
     width: 100%;
     display: flex;
@@ -68,6 +132,8 @@ canvas {
     z-index: 10;
     padding: 0.5rem;
 }
+
+/* ========================  */
 
 .toggle {
     background-color: rgb(255 255 255 / 10%);
@@ -116,9 +182,6 @@ canvas {
     pointer-events: none;
 }
 
-body:has(#sound-toggle[data-toggled="true"]) #sound-message {
-    opacity: 0;
-}
 
 #sound-message>p {
     color: white;
