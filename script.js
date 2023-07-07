@@ -279,6 +279,32 @@ function renderMovingDot(center, radiusFromCenter, index, currentTime, circle, e
     renderDotOnArc(center, radiusFromCenter, baseRadius, angle);
 }
 
+// ============================== (STATIC) COMPOSED RENDERING ==============================
+
+function renderStaticBgCircle(center, radiusFromCenter, color, baseRadius, baseLength) {
+    plotter.globalAlpha = settings.defaultBaseOpacity;
+    plotter.lineWidth = baseLength * 0.002;
+    plotter.strokeStyle = color;
+
+    renderArc(center.x, center.y, radiusFromCenter, Math.PI, 2 * Math.PI);
+    renderArc(center.x, center.y, radiusFromCenter, 0, Math.PI);
+}
+
+function renderStaticBgImpactPoints(center, radiusFromCenter, color, baseRadius) {
+    plotter.globalAlpha = settings.defaultBaseOpacity;
+    plotter.fillStyle = color;
+
+    renderDotOnArc(center, radiusFromCenter, baseRadius * 0.75, Math.PI);
+    renderDotOnArc(center, radiusFromCenter, baseRadius * 0.75, 2 * Math.PI);
+}
+
+function renderStaticStartingDot(center, radiusFromCenter, color, angle, baseRadius) {
+    plotter.globalAlpha = 1;
+    plotter.fillStyle = color;
+
+    renderDotOnArc(center, radiusFromCenter, baseRadius, angle);
+}
+
 function preAnimationRenders() {
     const currentTime = new Date().getTime();
     const { center, base } = setupForRenderer();
@@ -286,12 +312,17 @@ function preAnimationRenders() {
     circles.forEach((circle, index) => {
         const radiusFromCenter = base.initialRadius + (base.spacing * index);
 
-        renderBgCircle(center, radiusFromCenter, circle.color, currentTime, circle.lastImpactTime, base.circleRadius, base.length);
+        renderStaticBgCircle(center, radiusFromCenter, circle.color, base.circleRadius, base.length);
 
-        renderBgImpactPoints(center, radiusFromCenter, circle.color, currentTime, circle.lastImpactTime, base.circleRadius);
+        renderStaticBgImpactPoints(center, radiusFromCenter, circle.color, base.circleRadius);
+
+        renderStaticStartingDot(center, radiusFromCenter, circle.color, Math.PI, base.circleRadius);
+
     });
 
 }
+
+// ============================== MAIN ANIMATION ==============================
 
 function render() {
 
