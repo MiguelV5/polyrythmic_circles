@@ -177,6 +177,7 @@ canvas {
     z-index: 3;
     padding: 0.75rem;
     background-color: rgb(255 255 255 / 5%);
+    backdrop-filter: blur(5px);
     border-radius: 0.4rem;
     transition: opacity 1000ms;
     pointer-events: none;

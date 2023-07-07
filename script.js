@@ -84,6 +84,9 @@ function handleFirstInteraction() {
 
     settings.startTime = new Date().getTime(); // reset start time for proper animation
 
+    const soundMessage = document.querySelector(".sound-message-text");
+    soundMessage.textContent = "Click anywhere to toggle sound";
+
     initCircles(); // reset circles for proper impact times
     render(); // start animation
 }
