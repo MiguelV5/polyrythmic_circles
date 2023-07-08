@@ -48,7 +48,11 @@ const COLORS = [
 const INSTRUMENTS = {
     default: "default",
     wave: "wave",
-    vibraphone: "vibraphone"
+    vibraphone: "vibraphone",
+    andromeda_waves: "andromeda_waves",
+    choir: "choir",
+    pink_carol: "pink_carol",
+    xylophone: "xylophone"
 }
 
 let settings = {
@@ -95,18 +99,27 @@ canvas.addEventListener("click", handleFirstInteraction);
 
 // ============================== AUDIOKEYS RETRIEVAL ==============================
 
-function getFileName(index) {
+function getSoundFileStem(index) {
     if (settings.instrument === "default") return `key-${index}`;
 
     return `${settings.instrument}-key-${index}`;
 }
 
-function getUrl(index) {
-    return `https://assets.codepen.io/1468070/${getFileName(index)}.wav`;
+function getSoundPath(index) {
+    if (
+        settings.instrument === INSTRUMENTS.default ||
+        settings.instrument === INSTRUMENTS.wave ||
+        settings.instrument === INSTRUMENTS.vibraphone
+    ) {
+        return `https://assets.codepen.io/1468070/${getSoundFileStem(index)}.wav`; // Original Skel Audio
+    }
+    else {
+        return `./assets/${settings.instrument}/${getSoundFileStem(index)}.wav`;
+    }
 }
 
 const audioKeys = COLORS.map((color, index) => {
-    const audio = new Audio(getUrl(index));
+    const audio = new Audio(getSoundPath(index));
 
     audio.volume = 0.012;
 
