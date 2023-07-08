@@ -7,7 +7,7 @@ It's mainly based from the following [video](https://www.youtube.com/watch?v=4Ga
 
 It was created with vanilla js applied on a html canvas, the credit for the initial script's skeleton goes to @Hyperplexed, I heavily modified it afterwards for better structuring, some QoL UI additions and style customization.
 
-The audio assets are generated with [SoundTrap](https://www.soundtrap.com/home/). 
+The audio assets were made with [SoundTrap](https://www.soundtrap.com/home/). 
 
 As for a brief explaination of the concept of polyrythms:
 
