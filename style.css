@@ -83,16 +83,16 @@ body {
 
 #background-image {
     z-index: 1;
-    background-image: url("https://raw.githubusercontent.com/MiguelV5/MiguelV5/main/misc/polyrythm_kogecha.jpg");
+    background-image: url("./assets/bg.jpg");
     background-size: cover;
     background-position: center;
     opacity: 0.5;
-    filter: blur(1px) grayscale(30%);
+    filter: grayscale(30%);
 }
 
 #background-filter {
     z-index: 2;
-    background: radial-gradient(rgb(0 0 0 / 60%) 60%, transparent);
+    background: radial-gradient(rgb(0 0 0 / 55%) 60%, transparent);
 }
 
 /* ========================  */
