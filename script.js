@@ -58,7 +58,7 @@ const INSTRUMENTS = {
 let settings = {
     startTime: new Date().getTime(),
     duration: 900, // Total time in seconds for all dots to realign at the starting point. 900 = 15 minutes
-    maxCycles: Math.max(COLORS.length, 100),
+    maxCircles: Math.max(COLORS.length, 21),
     soundEnabled: false, // User still must interact with screen first
     pulseEnabled: true, // Pulse will only show if sound is enabled as well
     instrument: INSTRUMENTS.wave,
@@ -131,10 +131,10 @@ const audioKeys = COLORS.map((color, index) => {
 let circles = [];
 
 function calculateVelocity(index) {
-    const numberOfCycles = settings.maxCycles - index;
-    const distancePerCycle = 2 * Math.PI;
+    const numberOfCircles = settings.maxCircles - index;
+    const distancePerCircle = 2 * Math.PI;
 
-    return (numberOfCycles * distancePerCycle) / settings.duration;
+    return (numberOfCircles * distancePerCircle) / settings.duration;
 }
 
 function calculateNextImpactTime(currentImpactTime, velocity) {
