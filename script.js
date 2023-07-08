@@ -58,7 +58,7 @@ const INSTRUMENTS = {
 let settings = {
     startTime: new Date().getTime(),
     duration: 900, // Total time in seconds for all dots to realign at the starting point. 900 = 15 minutes
-    maxCircles: Math.max(COLORS.length, 21),
+    maxCycles: Math.max(COLORS.length, 100),
     soundEnabled: false, // User still must interact with screen first
     pulseEnabled: true, // Pulse will only show if sound is enabled as well
     instrument: INSTRUMENTS.wave,
@@ -130,15 +130,15 @@ const audioKeys = COLORS.map((color, index) => {
 
 let circles = [];
 
-function calculateVelocity(index) {
-    const numberOfCircles = settings.maxCircles - index;
-    const distancePerCircle = 2 * Math.PI;
+function calculateAngularVelocity(index) {
+    const numberOfCycles = settings.maxCycles - index;
+    const angularDistancePerCycle = 2 * Math.PI;
 
-    return (numberOfCircles * distancePerCircle) / settings.duration;
+    return (numberOfCycles * angularDistancePerCycle) / settings.duration;
 }
 
-function calculateNextImpactTime(currentImpactTime, velocity) {
-    return currentImpactTime + (Math.PI / velocity) * 1000;
+function calculateNextImpactTime(currentImpactTime, angularVelocity) {
+    return currentImpactTime + (Math.PI / angularVelocity) * 1000;
 }
 
 function calculateDynamicOpacity(currentTime, lastImpactTime, baseOpacity, maxOpacity, duration) {
@@ -169,13 +169,13 @@ function initCircles() {
 
     circles = COLORS.map(
         (color, index) => {
-            const velocity = calculateVelocity(index);
+            const angularVelocity = calculateAngularVelocity(index);
             const lastImpactTime = 0;
-            const nextImpactTime = calculateNextImpactTime(settings.startTime, velocity);
+            const nextImpactTime = calculateNextImpactTime(settings.startTime, angularVelocity);
 
             return {
                 color,
-                velocity,
+                angularVelocity,
                 lastImpactTime,
                 nextImpactTime
             }
@@ -286,11 +286,11 @@ function renderMovingDot(center, radiusFromCenter, index, currentTime, circle, e
             circle.lastImpactTime = circle.nextImpactTime;
         }
 
-        circle.nextImpactTime = calculateNextImpactTime(circle.nextImpactTime, circle.velocity);
+        circle.nextImpactTime = calculateNextImpactTime(circle.nextImpactTime, circle.angularVelocity);
     }
 
-    const distance = elapsedTime >= 0 ? (elapsedTime * circle.velocity) : 0;
-    const angle = (Math.PI + distance) % baseMaxAngle;
+    const angularDistance = elapsedTime >= 0 ? (elapsedTime * circle.angularVelocity) : 0;
+    const angle = (Math.PI + angularDistance) % baseMaxAngle;
 
     renderDotOnArc(center, radiusFromCenter, baseRadius, angle);
 }
