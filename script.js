@@ -61,7 +61,7 @@ let settings = {
     maxCycles: Math.max(COLORS.length, 100),
     soundEnabled: false, // User still must interact with screen first
     pulseEnabled: true, // Pulse will only show if sound is enabled as well
-    instrument: INSTRUMENTS.wave,
+    instrument: INSTRUMENTS.xylophone,
     defaultBaseOpacity: 0.25,
     defaultMaxOpacity: 0.9,
     defaultPulseDuration: 1000
@@ -114,14 +114,14 @@ function getSoundPath(index) {
         return `https://assets.codepen.io/1468070/${getSoundFileStem(index)}.wav`; // Original Skel Audio
     }
     else {
-        return `./assets/${settings.instrument}/${getSoundFileStem(index)}.wav`;
+        return `./assets/${settings.instrument}/${getSoundFileStem(index)}.mp3`;
     }
 }
 
 const audioKeys = COLORS.map((color, index) => {
     const audio = new Audio(getSoundPath(index));
 
-    audio.volume = 0.012;
+    audio.volume = 0.018;
 
     return audio;
 });
