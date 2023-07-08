@@ -10,9 +10,6 @@ window.addEventListener("load", () => {
 let canvas = document.getElementById("canvas")
 let plotter = canvas.getContext("2d");
 
-// flags
-let isAnimationEnabled = false;
-
 function getSelector(selector) {
     return document.querySelector(selector);
 }
@@ -78,7 +75,6 @@ function handleSoundToggle(enabled = !settings.soundEnabled) {
 document.onvisibilitychange = () => handleSoundToggle(false);
 
 function handleFirstInteraction() {
-    isAnimationEnabled = true;
     handleSoundToggle();
 
     canvas.removeEventListener("click", handleFirstInteraction);
@@ -256,7 +252,7 @@ function renderBgCircle(center, radiusFromCenter, color, currentTime, lastImpact
 
     const offset = baseRadius * (5 / 3) / radiusFromCenter;
 
-    renderArc(center.x, center.y, radiusFromCenter, Math.PI + offset, (2 * Math.PI) - offset); // AESTHETIC POSSIBLE CHANGE
+    renderArc(center.x, center.y, radiusFromCenter, Math.PI + offset, (2 * Math.PI) - offset);
     renderArc(center.x, center.y, radiusFromCenter, offset, Math.PI - offset);
 }
 
@@ -271,7 +267,7 @@ function renderBgImpactPoints(center, radiusFromCenter, color, currentTime, last
     plotter.fillStyle = color;
 
     renderDotOnArc(center, radiusFromCenter, baseRadius * 0.75, Math.PI);
-    renderDotOnArc(center, radiusFromCenter, baseRadius * 0.75, 2 * Math.PI); // AESTHETIC POSSIBLE CHANGE
+    renderDotOnArc(center, radiusFromCenter, baseRadius * 0.75, 2 * Math.PI);
 }
 
 function renderMovingDot(center, radiusFromCenter, index, currentTime, circle, elapsedTime, baseRadius, baseMaxAngle) {
@@ -340,25 +336,23 @@ function preAnimationRenders() {
 
 function render() {
 
-    if (isAnimationEnabled) {
+    const currentTime = new Date().getTime();
+    const elapsedTime = (currentTime - settings.startTime) / 1000;
 
-        const currentTime = new Date().getTime();
-        const elapsedTime = (currentTime - settings.startTime) / 1000;
-
-        const { center, base } = setupForRenderer();
+    const { center, base } = setupForRenderer();
 
 
-        circles.forEach((circle, index) => {
-            const radiusFromCenter = base.initialRadius + (base.spacing * index);
+    circles.forEach((circle, index) => {
+        const radiusFromCenter = base.initialRadius + (base.spacing * index);
 
-            renderBgCircle(center, radiusFromCenter, circle.color, currentTime, circle.lastImpactTime, base.circleRadius, base.length);
+        renderBgCircle(center, radiusFromCenter, circle.color, currentTime, circle.lastImpactTime, base.circleRadius, base.length);
 
-            renderBgImpactPoints(center, radiusFromCenter, circle.color, currentTime, circle.lastImpactTime, base.circleRadius);
+        renderBgImpactPoints(center, radiusFromCenter, circle.color, currentTime, circle.lastImpactTime, base.circleRadius);
 
-            renderMovingDot(center, radiusFromCenter, index, currentTime, circle, elapsedTime, base.circleRadius, base.maxAngle);
+        renderMovingDot(center, radiusFromCenter, index, currentTime, circle, elapsedTime, base.circleRadius, base.maxAngle);
 
-        });
-    }
+    });
+
     requestAnimationFrame(render);
 }
 
