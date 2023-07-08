@@ -49,8 +49,6 @@ const INSTRUMENTS = {
     default: "default",
     wave: "wave",
     vibraphone: "vibraphone",
-    andromeda_waves: "andromeda_waves",
-    choir: "choir",
     pink_carol: "pink_carol",
     xylophone: "xylophone"
 }
@@ -61,7 +59,7 @@ let settings = {
     maxCycles: Math.max(COLORS.length, 100),
     soundEnabled: false, // User still must interact with screen first
     pulseEnabled: true, // Pulse will only show if sound is enabled as well
-    instrument: INSTRUMENTS.xylophone,
+    instrument: INSTRUMENTS.wave,
     defaultBaseOpacity: 0.25,
     defaultMaxOpacity: 0.9,
     defaultPulseDuration: 1000
