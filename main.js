@@ -56,7 +56,7 @@ let settings = {
     maxCycles: Math.max(COLORS.length, 100),
     soundEnabled: false, // User still must interact with screen first
     pulseEnabled: true, // Pulse will only show if sound is enabled as well
-    instrument: INSTRUMENTS.wave,
+    instrument: INSTRUMENTS.vibraphone,
     defaultBaseOpacity: 0.25,
     defaultMaxOpacity: 0.9,
     defaultPulseDuration: 1000
